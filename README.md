@@ -3,7 +3,7 @@ This package requires a credentials CSV file structured as follows:
 
 | storage_account_name  | storage_account_key | file_system | files |
 | ------------- | ------------- | ------------- | ------------- |
-| <account name>  | <API key>  | <bucket name>  | directory  |
+| account name  | API key  | bucket name  | directory  |
   
 The credentials file should be connected to input #1 of the Python tool in Alteryx:
   
