@@ -1,15 +1,14 @@
-import configparser
+import pandas as pd
 from azure.storage.filedatalake import DataLakeServiceClient
 
 # Import config file
-config = configparser.ConfigParser()
-config.read('config.ini')
+df = pd.read_csv("/Users/jamielaird/Desktop/credentials.csv")
 
 # Import config parameters
-storage_account_name = config['sandbox']['storage_account_name']
-storage_account_key = config['sandbox']['storage_account_key']
-file_system = config['sandbox']['file_system']
-directory = config['sandbox']['directory']
+storage_account_name = df.iloc[0,0]
+storage_account_key = df.iloc[0,1]
+file_system = df.iloc[0,2]
+directory = df.iloc[0,3]
 
 # Create connection method
 def initialize_storage_account(storage_account_name, storage_account_key):
@@ -41,4 +40,7 @@ def list_directory_contents(file_system, directory):
      print(e)
 
 # List directory contents
-list_directory_contents(file_system, directory)
+results = list_directory_contents(file_system, directory)
+
+# Print results
+print(results)
