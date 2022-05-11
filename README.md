@@ -1,4 +1,5 @@
 # Alteryx ADLS Reader
+## Configuration
 This package requires a credentials CSV file structured as follows:
 
 | storage_account_name  | storage_account_key | file_system | files |
