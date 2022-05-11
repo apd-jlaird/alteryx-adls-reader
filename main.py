@@ -28,13 +28,16 @@ initialize_storage_account(storage_account_name, storage_account_key)
 # Create directory contents method
 def list_directory_contents(file_system, directory):
     try:
-        
+        file_paths = []
+
         file_system_client = service_client.get_file_system_client(file_system = file_system)
 
         paths = file_system_client.get_paths(path = directory)
 
         for path in paths:
-            print(path.name + '\n')
+            file_paths.append(path.name)
+
+        return file_paths
 
     except Exception as e:
      print(e)
@@ -42,5 +45,8 @@ def list_directory_contents(file_system, directory):
 # List directory contents
 results = list_directory_contents(file_system, directory)
 
-# Print results
-print(results)
+# Create dataframe
+df = pd.DataFrame(results)
+
+# Print dataframe
+print(df)
