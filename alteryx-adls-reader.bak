@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<AlteryxDocument yxmdVer="2021.4">
+  <Nodes>
+    <Node ToolID="1">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
+        <Position x="54" y="54" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Passwords />
+          <File RecordLimit="" SearchSubDirs="False" FileFormat="0" OutputFileName="">\\Mac\Home\Desktop\credentials.csv</File>
+          <FormatSpecificOptions>
+            <HeaderRow>True</HeaderRow>
+            <IgnoreErrors>False</IgnoreErrors>
+            <AllowShareWrite>False</AllowShareWrite>
+            <ImportLine>1</ImportLine>
+            <FieldLen>254</FieldLen>
+            <SingleThreadRead>False</SingleThreadRead>
+            <IgnoreQuotes>DoubleQuotes</IgnoreQuotes>
+            <Delimeter>,</Delimeter>
+            <QuoteRecordBreak>False</QuoteRecordBreak>
+            <CodePage>28591</CodePage>
+          </FormatSpecificOptions>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>credentials.csv</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+        <MetaInfo connection="Output">
+          <RecordInfo>
+            <Field name="storage_account_name" size="254" source="File: \\Mac\Home\Desktop\credentials.csv" type="V_WString" />
+            <Field name="storage_account_key" size="254" source="File: \\Mac\Home\Desktop\credentials.csv" type="V_WString" />
+            <Field name="file_system" size="254" source="File: \\Mac\Home\Desktop\credentials.csv" type="V_WString" />
+            <Field name="directory" size="254" source="File: \\Mac\Home\Desktop\credentials.csv" type="V_WString" />
+          </RecordInfo>
+        </MetaInfo>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
+    </Node>
+    <Node ToolID="2">
+      <GuiSettings Plugin="JupyterCode">
+        <Position x="210" y="54" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <WorkflowName>\\mac\home\desktop\alteryx-adls-reader.yxmd</WorkflowName>
+          <JupyterProduction>true</JupyterProduction>
+          <vEnvName>designerbasetools_venv</vEnvName>
+          <DefaultVenv>1</DefaultVenv>
+          <productionModeScript>#################################
+# List all non-standard packages to be imported by your 
+# script here (only missing packages will be installed)
+from ayx import Package
+Package.installPackages(['azure-storage-file-datalake','pandas'])
+
+
+#################################
+from ayx import Alteryx
+from azure.storage.filedatalake import DataLakeServiceClient
+import pandas as pd
+
+
+
+#################################
+df = Alteryx.read("#1")
+
+
+#################################
+storage_account_name = df.iloc[0,0]
+storage_account_key = df.iloc[0,1]
+file_system = df.iloc[0,2]
+directory = df.iloc[0,3]
+
+
+#################################
+# Create connection method
+def initialize_storage_account(storage_account_name, storage_account_key):
+    
+    try:  
+        global service_client
+
+        service_client = DataLakeServiceClient(account_url="{}://{}.dfs.core.windows.net".format(
+            "https", storage_account_name), credential=storage_account_key)
+    
+    except Exception as e:
+        print(e)
+
+
+#################################
+# Connect to account
+initialize_storage_account(storage_account_name, storage_account_key)
+
+
+#################################
+def list_directory_contents(file_system, directory):
+    try:
+        file_paths = []
+
+        file_system_client = service_client.get_file_system_client(file_system = file_system)
+
+        paths = file_system_client.get_paths(path = directory)
+
+        for path in paths:
+            file_paths.append(path.name)
+
+        return file_paths
+
+    except Exception as e:
+     print(e)
+
+
+#################################
+# List directory contents
+results = list_directory_contents(file_system, directory)
+
+
+#################################
+# Create dataframe
+df = pd.DataFrame(results)
+
+
+#################################
+# Write to output #1
+Alteryx.write(df,1)
+
+
+#################################
+</productionModeScript>
+          <Port>54750</Port>
+          <JupyterGuidDir>f5c8e3201eb6a4ebeb13dd8383f0ecf5</JupyterGuidDir>
+          <JupyterGuidCopy />
+          <LastExecutedByEngineVersion>2021.4.2.02731</LastExecutedByEngineVersion>
+          <Notebook><![CDATA[{"cells":[{"cell_type":"markdown","metadata":{"ayx":{"cell_class":"text_cell","cell_css":"border: 3px solid #357; margin: 4px; background: #fbffff","cell_type":"markdown","contents_keyword":"Alteryx.help()","first_line":"Run `Alteryx.help()` for info about useful functions.","label":"info"}},"source":["Run `Alteryx.help()` for info about useful functions.  \n","i.e., `Alteryx.read(\"#1\")`, `Alteryx.write(df,1)`, `Alteryx.getWorkflowConstant(\"Engine.WorkflowDirectory\")`"]},{"cell_type":"code","execution_count":1,"metadata":{"ayx":{"cell_class":"code_cell","cell_css":"border: 1px solid #58a; margin: 2px;","cell_type":"code","contents_keyword":"installPackages","first_line":"# List all non-standard packages to be imported by your","label":"deps"}},"outputs":[],"source":["# List all non-standard packages to be imported by your \n","# script here (only missing packages will be installed)\n","from ayx import Package\n","Package.installPackages(['azure-storage-file-datalake','pandas'])"]},{"cell_type":"code","execution_count":2,"metadata":{},"outputs":[],"source":["from ayx import Alteryx\n","from azure.storage.filedatalake import DataLakeServiceClient\n","import pandas as pd\n"]},{"cell_type":"code","execution_count":3,"metadata":{},"outputs":[],"source":["df = Alteryx.read(\"#1\")"]},{"cell_type":"code","execution_count":4,"metadata":{},"outputs":[],"source":["storage_account_name = df.iloc[0,0]\n","storage_account_key = df.iloc[0,1]\n","file_system = df.iloc[0,2]\n","directory = df.iloc[0,3]"]},{"cell_type":"code","execution_count":5,"metadata":{},"outputs":[],"source":["# Create connection method\n","def initialize_storage_account(storage_account_name, storage_account_key):\n","    \n","    try:  \n","        global service_client\n","\n","        service_client = DataLakeServiceClient(account_url=\"{}://{}.dfs.core.windows.net\".format(\n","            \"https\", storage_account_name), credential=storage_account_key)\n","    \n","    except Exception as e:\n","        print(e)"]},{"cell_type":"code","execution_count":6,"metadata":{},"outputs":[],"source":["# Connect to account\n","initialize_storage_account(storage_account_name, storage_account_key)"]},{"cell_type":"code","execution_count":7,"metadata":{},"outputs":[],"source":["def list_directory_contents(file_system, directory):\n","    try:\n","        file_paths = []\n","\n","        file_system_client = service_client.get_file_system_client(file_system = file_system)\n","\n","        paths = file_system_client.get_paths(path = directory)\n","\n","        for path in paths:\n","            file_paths.append(path.name)\n","\n","        return file_paths\n","\n","    except Exception as e:\n","     print(e)"]},{"cell_type":"code","execution_count":8,"metadata":{},"outputs":[],"source":["# List directory contents\n","results = list_directory_contents(file_system, directory)"]},{"cell_type":"code","execution_count":9,"metadata":{},"outputs":[],"source":["# Create dataframe\n","df = pd.DataFrame(results)"]},{"cell_type":"code","execution_count":10,"metadata":{},"outputs":[],"source":["# Write to output #1\n","Alteryx.write(df,1)"]},{"cell_type":"code","execution_count":null,"metadata":{},"outputs":[],"source":[]}],"metadata":{"kernelspec":{"display_name":"designerbasetools_venv","language":"python","name":"designerbasetools_venv"},"language_info":{"codemirror_mode":{"name":"ipython","version":3},"file_extension":".py","mimetype":"text/x-python","name":"python","nbconvert_exporter":"python","pygments_lexer":"ipython3","version":"3.8.5"}},"nbformat":4,"nbformat_minor":2}]]></Notebook>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText />
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxJupyterPluginEngine.dll" EngineDllEntryPoint="AlteryxJupyter" />
+    </Node>
+  </Nodes>
+  <Connections>
+    <Connection name="#1">
+      <Origin ToolID="1" Connection="Output" />
+      <Destination ToolID="2" Connection="Input" />
+    </Connection>
+  </Connections>
+  <Properties>
+    <Memory default="True" />
+    <GlobalRecordLimit value="0" />
+    <TempFiles default="True" />
+    <Annotation on="True" includeToolName="False" />
+    <ConvErrorLimit value="10" />
+    <ConvErrorLimit_Stop value="False" />
+    <CancelOnError value="False" />
+    <DisableBrowse value="False" />
+    <EnablePerformanceProfiling value="False" />
+    <PredictiveToolsCodePage value="1252" />
+    <DisableAllOutput value="False" />
+    <ShowAllMacroMessages value="False" />
+    <ShowConnectionStatusIsOn value="True" />
+    <ShowConnectionStatusOnlyWhenRunning value="True" />
+    <ZoomLevel value="0" />
+    <LayoutType>Horizontal</LayoutType>
+    <MetaInfo>
+      <NameIsFileName value="True" />
+      <Name>alteryx-adls-reader</Name>
+      <Description />
+      <RootToolName />
+      <ToolVersion />
+      <ToolInDb value="False" />
+      <CategoryName />
+      <SearchTags />
+      <Author />
+      <Company />
+      <Copyright />
+      <DescriptionLink actual="" displayed="" />
+      <Example>
+        <Description />
+        <File />
+      </Example>
+      <WorkflowId value="877f8b57-95da-43c7-bbc1-647c9a5ad94e" />
+      <Telemetry>
+        <PreviousWorkflowId value="1030ecf3-6b46-4e56-9eb7-1ada00b8a561" />
+        <OriginWorkflowId value="72a0ac2b-02a9-4e90-9e7d-4f9bbfa7f7b3" />
+      </Telemetry>
+    </MetaInfo>
+    <Events>
+      <Enabled value="True" />
+    </Events>
+  </Properties>
+</AlteryxDocument>
