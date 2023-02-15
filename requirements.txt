@@ -1,7 +1,7 @@
 azure-core==1.25.1
 azure-storage-blob==12.13.1
 azure-storage-file-datalake==12.8.0
-certifi==2022.9.24
+certifi
 cffi==1.15.1
 charset-normalizer==2.1.1
 cryptography
